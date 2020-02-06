@@ -17,11 +17,11 @@ if ($post !== null) {
 
     foreach ($post as $column => $value) {
         if ($column == 'time') continue;
+        // basic value type detection
+        $type = is_numeric($value) ? 'DOUBLE PRECISION' : 'CHARACTER VARYING';
         // avoid SQL injections
         $column = pg_escape_identifier($column);
         $value = pg_escape_literal($value);
-        // basic value type detection
-        $type = is_numeric($value) ? 'DOUBLE PRECISION' : 'CHARACTER VARYING';
 
         // make sure requested column exists
         $res = pg_query("ALTER TABLE $table ADD COLUMN IF NOT EXISTS $column $type") or die('Query failed: ' . pg_last_error());

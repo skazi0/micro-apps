@@ -2,6 +2,8 @@
 $pw = explode(':', file_get_contents('/etc/nginx/statspasswd'));
 $db = pg_connect("host=$pw[0] dbname=stats user=$pw[1] password=$pw[2]") or die('Could not connect: ' . pg_last_error());
 
+$table = pg_escape_identifier($_GET['table']);
+
 $json = file_get_contents('php://input');
 $post = json_decode($json, true);
 // TODO: handle json decode errors
@@ -17,7 +19,6 @@ function ensure_column($table, $column, $type) {
 
 // write data
 if ($post !== null) {
-    $table = pg_escape_identifier($_GET['table']);
     // make sure requested table exists
     $res = pg_query("CREATE TABLE IF NOT EXISTS $table (time TIMESTAMP WITH TIME ZONE NOT NULL)") or die('Query failed: ' . pg_last_error());
     pg_free_result($res);
@@ -64,6 +65,24 @@ if ($post !== null) {
         }
     }
     print "OK";
+} else {
+    // GET query last value before the given time
+    $time = pg_escape_literal($_GET['time']);
+    $column = $_GET['field'] ?? 'value';
+    $column = pg_escape_identifier($column);
+
+    // try to translate openhab table name
+    $tablename = pg_escape_literal($_GET['table']);
+    $res = pg_query("SELECT itemid FROM items WHERE itemname=$tablename");
+    if (pg_num_rows($res) > 0) {
+        $row = pg_fetch_row($res);
+        $table = pg_escape_identifier(sprintf("%s_%04d", strtolower($_GET['table']), $row[0]));
+    }
+
+    $res = pg_query("SELECT $column FROM $table WHERE time < $time ORDER BY time DESC LIMIT 1") or die('Query failed: ' . pg_last_error());
+    $row = pg_fetch_row($res);
+    pg_free_result($res);
+    print $row[0];
 }
 
 pg_close($db);

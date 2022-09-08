@@ -1,26 +1,28 @@
 <?php
-$c = 'EUR/PLN';
+$c = 'EUR / PLN';
 $d = date('Y-m-d');
-$url = "https://www.centrum24.pl/efx/polling?c=$c&d=$d";
+$url = "https://www.santander.pl/klient-indywidualny/karty-platnosci-i-kantor/kantor-santander?action=component_request.action&component.action=getRates&component.id=2451485";
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0');
+curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 $content = curl_exec($ch);
 curl_close($ch);
 
 $json = json_decode($content, true);
-// all ranges
-$ranges = $json['fxData'][$c]['r'];
-// select range with lowest floor
-$minrange = $ranges[0];
-foreach ($ranges as $range) {
-    if ((float)$minrange['f'] > (float)$range['f']) {
-        $minrange = $range;
+// all rates
+$rates = $json['rates'];
+$json = array();
+foreach ($rates as $r) {
+    if ($r['label'] == $c) {
+        $json = $r;
+        break;
     }
 }
-$json = $minrange['rt'][0];
+// map to old structure
+$json['a'] = floatval(str_replace(',', '.', $json['wantToBuyRate']));
+$json['b'] = floatval(str_replace(',', '.', $json['wantToSellRate']));
 
 header('Content-Type: application/json');
 print json_encode($json, JSON_PRETTY_PRINT);

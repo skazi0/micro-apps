@@ -1,7 +1,8 @@
 <?php
 $types = ['silver', 'gold'];
 function get_rate($type) {
-    $url = "https://goldenmark.com/wp-json/gmsc/v1/rates/${type}_pln/0/day";
+#    $url = "https://goldenmark.com/wp-json/gmsc/v1/rates/${type}_pln/0/day";
+    $url = "https://goldenmark.com/wp-json/gmsc/v1/rates/${type}_pln/1/month";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
@@ -11,7 +12,7 @@ function get_rate($type) {
     curl_close($ch);
     $json = json_decode($content);
     $last= end($json);
-    return Array( 'rate' => $last[1], 'time' => $last[0] );
+    return Array( 'rate' => $last[1], 'time' => intval($last[0]) );
 }
 
 $rates = Array();

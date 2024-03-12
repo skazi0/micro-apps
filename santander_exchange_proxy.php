@@ -24,5 +24,10 @@ foreach ($rates as $r) {
 $json['a'] = floatval(str_replace(',', '.', $json['wantToBuyRate']));
 $json['b'] = floatval(str_replace(',', '.', $json['wantToSellRate']));
 
+if ($json['a'] == 0 || $json['b'] == 0) {
+    http_response_code(503);
+    die("Invalid/zero rates!");
+}
+
 header('Content-Type: application/json');
 print json_encode($json, JSON_PRETTY_PRINT);

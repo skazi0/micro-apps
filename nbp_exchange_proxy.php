@@ -4,7 +4,7 @@ if ($table != 'A' && $table != 'C') {
     http_response_code(503);
     die("Bad table. Only 'A' and 'C' supported.");
 }
-$url = 'http://www.nbp.pl/kursy/xml/Last'.$table.'.xml';
+$url = 'https://static.nbp.pl/dane/kursy/xml/Last'.$table.'.xml';
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);

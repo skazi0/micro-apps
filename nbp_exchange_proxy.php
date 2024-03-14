@@ -4,6 +4,7 @@ if ($table != 'A' && $table != 'C') {
     http_response_code(503);
     die("Bad table. Only 'A' and 'C' supported.");
 }
+# TODO: use http://api.nbp.pl/
 $url = 'https://static.nbp.pl/dane/kursy/xml/Last'.$table.'.xml';
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);

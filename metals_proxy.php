@@ -1,12 +1,14 @@
 <?php
 $types = ['silver', 'gold'];
+$agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0';
 function get_rate($type) {
+    global $agent;
 #    $url = "https://goldenmark.com/wp-json/gmsc/v1/rates/${type}_pln/0/day";
     $url = "https://goldenmark.com/wp-json/gmsc/v1/rates/${type}_pln/1/month";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0');
+    curl_setopt($ch, CURLOPT_USERAGENT, $agent);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $content = curl_exec($ch);
     curl_close($ch);
@@ -16,6 +18,7 @@ function get_rate($type) {
 }
 
 function get_rate1($type) {
+    global $agent;
     $ts = round(microtime(true)*1000);
     $ts2 = $ts+1;
     $cb = "jQuery3610728713133403863_${ts}";
@@ -23,7 +26,7 @@ function get_rate1($type) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0');
+    curl_setopt($ch, CURLOPT_USERAGENT, $agent);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $content = curl_exec($ch);
     curl_close($ch);
@@ -34,10 +37,34 @@ function get_rate1($type) {
     return Array( 'rate' => $last[1], 'time' => intval($last[0]/1000) );
 }
 
-$rates = Array();
-foreach ($types as $type) {
-    $rates[$type] = get_rate1($type);
+function get_rate2() {
+    global $agent;
+    // set currency
+    $ch = curl_init("https://stonexbullion.com/en/?change=1&curRate=zloty_rate");
+    curl_setopt($ch, CURLOPT_COOKIEJAR, '/tmp/metalcookie.txt');
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+    curl_setopt($ch, CURLOPT_USERAGENT, $agent);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $content = curl_exec($ch);
+    // fetch rates
+    $ch = curl_init("https://stonexbullion.com/ajax/spot-rates/");
+    curl_setopt($ch, CURLOPT_COOKIEFILE, '/tmp/metalcookie.txt');
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+    curl_setopt($ch, CURLOPT_USERAGENT, $agent);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $content = curl_exec($ch);
+    curl_close($ch);
+    $json = json_decode($content);
+    $ret = Array();
+    foreach ($json->data as $type => $data) {
+        $ret[$type] = Array( 'rate' => $data->price );
+    }
+    return $ret;
 }
-
+//$rates = Array();
+//foreach ($types as $type) {
+//    $rates[$type] = get_rate1($type);
+//}
+$rates = get_rate2();
 header('Content-Type: application/json');
 print json_encode($rates, JSON_PRETTY_PRINT);

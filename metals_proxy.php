@@ -61,10 +61,34 @@ function get_rate2() {
     }
     return $ret;
 }
+
+function get_rate3() {
+    global $agent;
+    // get nbp pln/eur rate
+    $ch = curl_init("http://api.nbp.pl/api/exchangerates/rates/A/EUR?format=json");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $content = curl_exec($ch);
+    curl_close($ch);
+    $json = json_decode($content);
+    $currency = $json->rates[0]->mid;
+    // fetch eur metal rates
+    $ch = curl_init("https://stonexbullion.com/ajax/spot-rates/");
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+    curl_setopt($ch, CURLOPT_USERAGENT, $agent);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $content = curl_exec($ch);
+    curl_close($ch);
+    $json = json_decode($content);
+    $ret = Array();
+    foreach ($json->data as $type => $data) {
+        $ret[$type] = Array( 'rate' => $data->price * $currency );
+    }
+    return $ret;
+}
 //$rates = Array();
 //foreach ($types as $type) {
 //    $rates[$type] = get_rate1($type);
 //}
-$rates = get_rate2();
+$rates = get_rate3();
 header('Content-Type: application/json');
 print json_encode($rates, JSON_PRETTY_PRINT);

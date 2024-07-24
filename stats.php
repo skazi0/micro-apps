@@ -7,7 +7,9 @@ $table = pg_escape_identifier($table_bare);
 
 $json = file_get_contents('php://input');
 $post = json_decode($json, true);
-// TODO: handle json decode errors
+if (json_last_error() != JSON_ERROR_NONE) {
+    http_die('JSON decoding error: '.json_last_error_msg().', input: \''.$json.'\'');
+}
 
 function http_die($msg) {
     http_response_code(500);

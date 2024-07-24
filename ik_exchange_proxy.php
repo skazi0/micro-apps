@@ -20,7 +20,7 @@ foreach ($json as $pair) {
     $curr = explode('_', $pair->pair);
     if ($curr[1] !== 'PLN')
         continue;
-    $data[$curr[0]] = Array( 'ts' => $pair->ts, 'buy' => $pair->directExchangeOffers->buyNow, 'sell' => $pair->directExchangeOffers->sellNow );
+    $data[$curr[0]] = Array('buy' => $pair->directExchangeOffers->buyNow, 'sell' => $pair->directExchangeOffers->sellNow);
 }
 
 

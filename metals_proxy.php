@@ -79,6 +79,10 @@ function get_rate3() {
     $content = curl_exec($ch);
     curl_close($ch);
     $json = json_decode($content);
+    if (json_last_error() != JSON_ERROR_NONE) {
+        die('JSON decoding error: '.json_last_error_msg().', input: \''.$content.'\'');
+    }
+
     $ret = Array();
     foreach ($json->data as $type => $data) {
         $ret[$type] = Array( 'rate' => $data->price * $currency );

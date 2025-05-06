@@ -72,7 +72,7 @@ function get_rate3() {
     $json = json_decode($content);
     $currency = $json->rates[0]->mid;
     // fetch eur metal rates
-    $ch = curl_init("https://stonexbullion.com/ajax/spot-rates/");
+    $ch = curl_init("https://stonexbullion.com/api/client/spot-rates/");
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
     curl_setopt($ch, CURLOPT_USERAGENT, $agent);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
@@ -82,7 +82,9 @@ function get_rate3() {
     if (json_last_error() != JSON_ERROR_NONE) {
         die('JSON decoding error: '.json_last_error_msg().', input: \''.$content.'\'');
     }
-
+    if ($json->status == 'Error') {
+        die('API returned error: '.$json->message);
+    }
     $ret = Array();
     foreach ($json->data as $type => $data) {
         $ret[$type] = Array( 'rate' => $data->price * $currency );

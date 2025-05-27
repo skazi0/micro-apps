@@ -11,6 +11,10 @@ $content = curl_exec($ch);
 curl_close($ch);
 
 $json = json_decode($content, true);
+if (!array_key_exists('rates', $json)) {
+    die('Unexpected response: '.$jcontent);
+}
+
 // all rates
 $rates = $json['rates'];
 $json = array();

@@ -91,10 +91,44 @@ function get_rate3() {
     }
     return $ret;
 }
-//$rates = Array();
-//foreach ($types as $type) {
-//    $rates[$type] = get_rate1($type);
-//}
-$rates = get_rate3();
+
+function get_rate4($type) {
+    global $agent;
+    // get nbp pln/eur rate
+    $ch = curl_init("http://api.nbp.pl/api/exchangerates/rates/A/EUR?format=json");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $content = curl_exec($ch);
+    curl_close($ch);
+    $json = json_decode($content);
+    $currency = $json->rates[0]->mid;
+    // fetch eur metal rates
+    $ch = curl_init("https://stonexbullion.com/api/client/charts/data?period=all&metal_code=".$type."&weight_code=oz");
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+    curl_setopt($ch, CURLOPT_USERAGENT, $agent);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $content = curl_exec($ch);
+    curl_close($ch);
+    $json = json_decode($content);
+    if (json_last_error() != JSON_ERROR_NONE) {
+        die('JSON decoding error: '.json_last_error_msg().', input: \''.$content.'\'');
+    }
+    if (!$json->success) {
+        die('API returned error: '.$jcontent);
+    }
+    $price = 0;
+    $maxts = 0;
+    foreach ($json->data->ranges as $point) {
+        if ($maxts < $point[0]) {
+            $maxts = $point[0];
+            $price = $point[1];
+        }
+    }
+    return $price * $currency;
+}
+$rates = Array();
+foreach ($types as $type) {
+    $rates[$type] = get_rate4($type);
+}
+//$rates = get_rate3();
 header('Content-Type: application/json');
 print json_encode($rates, JSON_PRETTY_PRINT);

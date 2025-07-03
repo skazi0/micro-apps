@@ -4,7 +4,7 @@ $agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Fir
 function get_rate($type) {
     global $agent;
 #    $url = "https://goldenmark.com/wp-json/gmsc/v1/rates/${type}_pln/0/day";
-    $url = "https://goldenmark.com/wp-json/gmsc/v1/rates/${type}_pln/1/month";
+    $url = "https://goldenmark.com/blog/wp-json/gmsc/v1/rates/${type}_pln/1/month";
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
@@ -127,7 +127,7 @@ function get_rate4($type) {
 }
 $rates = Array();
 foreach ($types as $type) {
-    $rates[$type] = get_rate4($type);
+    $rates[$type] = get_rate($type);
 }
 //$rates = get_rate3();
 header('Content-Type: application/json');

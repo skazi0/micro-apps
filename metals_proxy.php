@@ -123,7 +123,7 @@ function get_rate4($type) {
             $price = $point[1];
         }
     }
-    return $price * $currency;
+    return Array('rate' => $price * $currency);
 }
 $rates = Array();
 foreach ($types as $type) {

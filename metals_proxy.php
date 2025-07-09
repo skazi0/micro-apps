@@ -13,7 +13,13 @@ function get_rate($type) {
     $content = curl_exec($ch);
     curl_close($ch);
     $json = json_decode($content);
+    if (json_last_error() != JSON_ERROR_NONE) {
+        die('JSON decoding error: '.json_last_error_msg().', input: \''.$content.'\'');
+    }
     $last= end($json);
+    if (!is_array($last)) {
+        die('Unexpected response: \''.$content.'\'');
+    }
     return Array( 'rate' => $last[1], 'time' => intval($last[0]) );
 }
 

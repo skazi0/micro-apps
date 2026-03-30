@@ -46,8 +46,8 @@ schedule = defaultdict(list)
 r = requests.post(url, data={'action': 'waste_disposal_form_get_schedule', 'id_numeru': CFG['address_id'] })
 msg = r.json()['wiadomosc']
 logger.debug("Schedule msg: %s", msg)
-m = re.search('href="[^"]+\?([^"]+)"', msg)
-params = dict(p.split('=') for p in m.group(1).split('&'))
+m = re.search(r'href="[^"]+\?([^"]+)"', msg)
+params = dict(p.split('=') for p in m.group(1).split('&#038;'))
 logger.debug("Schedule data: %s", params)
 for i in range(1, int(params['params'])+1):
     what = params['co_%d' % i]
